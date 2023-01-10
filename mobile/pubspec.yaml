@@ -10,11 +10,14 @@ environment:
   sdk: '>=2.18.2 <3.0.0'
 
 dependencies:
+  firebase_auth: ^4.2.4
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   flutter_secure_storage: ^7.0.0
+  google_sign_in: ^5.4.2
+  provider: ^6.0.5
   shared_preferences: ^2.0.15
 
 dev_dependencies:
