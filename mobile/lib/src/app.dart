@@ -1,6 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:mobile/src/profile/profile_view.dart';
+import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
+import 'package:mobile/src/sign_in/sign_in_view.dart';
 import 'package:provider/provider.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
@@ -18,8 +22,9 @@ class MyApp extends StatelessWidget {
     //
     // The AnimatedBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    return Consumer<SettingsController>(
-      builder: (context, settingsController, child) => AnimatedBuilder(
+    return Consumer2<SettingsController, GoogleSingInController>(
+      builder: (context, settingsController, googleSingInController, child) =>
+          AnimatedBuilder(
         animation: settingsController,
         builder: (BuildContext context, Widget? child) {
           return MaterialApp(
@@ -63,19 +68,27 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute<void>(
                 settings: routeSettings,
                 builder: (BuildContext context) {
-                  final arguments = routeSettings.arguments;
-                  switch (routeSettings.name) {
-                    case SettingsView.routeName:
-                      return const SettingsView();
-                    case SampleItemDetailsView.routeName:
-                      if (arguments is int) {
-                        return SampleItemDetailsView(id: arguments);
-                      }
-                      continue def;
-                    case SampleItemListView.routeName:
-                    def:
-                    default:
-                      return const SampleItemListView();
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) {
+                    return const SignInView();
+                  } else {
+                    final arguments = routeSettings.arguments;
+
+                    switch (routeSettings.name) {
+                      case SettingsView.routeName:
+                        return const SettingsView();
+                      case SampleItemDetailsView.routeName:
+                        if (arguments is int) {
+                          return SampleItemDetailsView(id: arguments);
+                        }
+                        continue def;
+                      case SampleItemListView.routeName:
+                        return const SampleItemListView();
+                      case ProfileView.routeName:
+                      def:
+                      default:
+                        return const ProfileView();
+                    }
                   }
                 },
               );
