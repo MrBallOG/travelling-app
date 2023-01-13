@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
 import 'package:provider/provider.dart';
 
 import 'src/app.dart';
@@ -22,7 +23,8 @@ void main() async {
   // SettingsView.
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (context) => settingsController)
+      ChangeNotifierProvider(create: (context) => settingsController),
+      ChangeNotifierProvider(create: (context) => GoogleSingInController())
     ],
     child: const MyApp(),
   ));
