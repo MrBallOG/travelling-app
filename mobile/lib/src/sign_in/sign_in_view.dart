@@ -66,10 +66,10 @@ class _SignInViewState extends State<SignInView> {
                           await singInController.signIn();
                           await navigator
                               .popAndPushNamed(ProfileView.routeName);
-                        } on ArgumentError catch (_) {
+                        } catch (_) {
                           unSetLoading();
                           const snackBar = SnackBar(
-                            content: Text('Failed to sign in'),
+                            content: Text("Failed to sign in"),
                             duration: Duration(seconds: 3),
                           );
                           messenger.showSnackBar(snackBar);

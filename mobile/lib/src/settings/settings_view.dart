@@ -53,18 +53,26 @@ class SettingsView extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () async {
                     final messenger = ScaffoldMessenger.of(context);
-                    final navigator = Navigator.of(context);
-                    final singInController =
-                        Provider.of<GoogleSingInController>(context,
-                            listen: false);
-                    await singInController.signOut();
-                    const snackBar = SnackBar(
-                      content: Text("You've been signed out"),
-                      duration: Duration(seconds: 3),
-                    );
-                    messenger.showSnackBar(snackBar);
-                    await navigator.pushNamedAndRemoveUntil(
-                        "/sign_in", (r) => false);
+                    try {
+                      final navigator = Navigator.of(context);
+                      final singInController =
+                          Provider.of<GoogleSingInController>(context,
+                              listen: false);
+                      await singInController.signOut();
+                      const snackBar = SnackBar(
+                        content: Text("You've been signed out"),
+                        duration: Duration(seconds: 3),
+                      );
+                      messenger.showSnackBar(snackBar);
+                      await navigator.pushNamedAndRemoveUntil(
+                          "/sign_in", (r) => false);
+                    } catch (_) {
+                      const snackBar = SnackBar(
+                        content: Text("Failed to sign out"),
+                        duration: Duration(seconds: 3),
+                      );
+                      messenger.showSnackBar(snackBar);
+                    }
                   },
                   child: const Text("Sign Out"),
                 ),
