@@ -10,7 +10,7 @@ class ProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    final user = FirebaseAuth.instance.currentUser!;
 
     return Scaffold(
       appBar: AppBar(
@@ -29,7 +29,24 @@ class ProfileView extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Text(user!.displayName!),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Center(
+              child: CircleAvatar(
+                radius: 60,
+                backgroundImage: NetworkImage(user.photoURL!),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                user.displayName!,
+                textScaleFactor: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
