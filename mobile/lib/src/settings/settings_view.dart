@@ -51,6 +51,11 @@ class SettingsView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(60.0),
+                    ),
+                  ),
                   onPressed: () async {
                     final messenger = ScaffoldMessenger.of(context);
                     try {
