@@ -58,7 +58,7 @@ class _SignInViewState extends State<SignInView> {
               Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Text("Travelling app", textScaleFactor: 2),
-              )
+              ),
             ],
           ),
           Row(
@@ -68,10 +68,27 @@ class _SignInViewState extends State<SignInView> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: SizedBox(
-                    width: 190,
+                    width: 216,
                     height: 60,
-                    child: SignInButton(
-                      Buttons.Google,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(60.0),
+                        ),
+                        backgroundColor: Colors.white,
+                      ),
+                      child: Row(
+                        children: const [
+                          Image(
+                            image: AssetImage('assets/logos/google_light.png',
+                                package: "flutter_signin_button"),
+                          ),
+                          Text(
+                            "Sing in with Google",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ],
+                      ),
                       onPressed: () async {
                         setLoading();
                         final messenger = ScaffoldMessenger.of(context);
