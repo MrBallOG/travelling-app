@@ -57,6 +57,10 @@ class SettingsView extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context).colorScheme.surface
+                            : Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(60.0),
                     ),
