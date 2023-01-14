@@ -41,7 +41,24 @@ class _SignInViewState extends State<SignInView> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Text("Logo"),
+              Icon(
+                Icons.forest,
+                color: Colors.green,
+                size: 60,
+              ),
+              Icon(
+                Icons.phone_android,
+                size: 40,
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text("Travelling app", textScaleFactor: 2),
+              )
             ],
           ),
           Row(
@@ -51,7 +68,7 @@ class _SignInViewState extends State<SignInView> {
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: SizedBox(
-                    width: 220,
+                    width: 190,
                     height: 60,
                     child: SignInButton(
                       Buttons.Google,
