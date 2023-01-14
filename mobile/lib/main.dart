@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
+import 'package:mobile/src/storage/local_storage.dart';
 import 'package:provider/provider.dart';
 
 import 'src/app.dart';
@@ -16,6 +17,7 @@ void main() async {
 
   // Load the user's preferred theme while the splash screen is displayed.
   // This prevents a sudden theme change when the app is first displayed.
+  await LocalStorage.initLocalStorage();
   await settingsController.loadSettings();
 
   // Run the app and pass in the SettingsController. The app listens to the
@@ -24,7 +26,7 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => settingsController),
-      Provider(create: (context) => GoogleSingInController())
+      Provider(create: (context) => GoogleSingInController()),
     ],
     child: const MyApp(),
   ));
