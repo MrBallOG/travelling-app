@@ -50,30 +50,31 @@ class _SignInViewState extends State<SignInView> {
               if (!isLoading)
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Consumer<GoogleSingInController>(
-                    builder: (context, controller, child) => SizedBox(
-                      width: 220,
-                      height: 60,
-                      child: SignInButton(
-                        Buttons.Google,
-                        onPressed: () async {
-                          setLoading();
-                          final messenger = ScaffoldMessenger.of(context);
-                          try {
-                            final navigator = Navigator.of(context);
-                            await controller.signInUser();
-                            await navigator
-                                .popAndPushNamed(ProfileView.routeName);
-                          } on ArgumentError catch (_) {
-                            unSetLoading();
-                            const snackBar = SnackBar(
-                              content: Text('Failed to sign in'),
-                              duration: Duration(seconds: 3),
-                            );
-                            messenger.showSnackBar(snackBar);
-                          }
-                        },
-                      ),
+                  child: SizedBox(
+                    width: 220,
+                    height: 60,
+                    child: SignInButton(
+                      Buttons.Google,
+                      onPressed: () async {
+                        setLoading();
+                        final messenger = ScaffoldMessenger.of(context);
+                        try {
+                          final navigator = Navigator.of(context);
+                          final singInController =
+                              Provider.of<GoogleSingInController>(context,
+                                  listen: false);
+                          await singInController.signIn();
+                          await navigator
+                              .popAndPushNamed(ProfileView.routeName);
+                        } on ArgumentError catch (_) {
+                          unSetLoading();
+                          const snackBar = SnackBar(
+                            content: Text('Failed to sign in'),
+                            duration: Duration(seconds: 3),
+                          );
+                          messenger.showSnackBar(snackBar);
+                        }
+                      },
                     ),
                   ),
                 ),

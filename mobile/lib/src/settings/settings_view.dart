@@ -50,22 +50,23 @@ class SettingsView extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
-                child: Consumer<GoogleSingInController>(
-                  builder: (context, controller, child) => ElevatedButton(
-                    onPressed: () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      final navigator = Navigator.of(context);
-                      await controller.signOutUser();
-                      const snackBar = SnackBar(
-                        content: Text("You've been signed out"),
-                        duration: Duration(seconds: 3),
-                      );
-                      messenger.showSnackBar(snackBar);
-                      await navigator.pushNamedAndRemoveUntil(
-                          "/sign_in", (r) => false);
-                    },
-                    child: const Text("Sign Out"),
-                  ),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final navigator = Navigator.of(context);
+                    final singInController =
+                        Provider.of<GoogleSingInController>(context,
+                            listen: false);
+                    await singInController.signOut();
+                    const snackBar = SnackBar(
+                      content: Text("You've been signed out"),
+                      duration: Duration(seconds: 3),
+                    );
+                    messenger.showSnackBar(snackBar);
+                    await navigator.pushNamedAndRemoveUntil(
+                        "/sign_in", (r) => false);
+                  },
+                  child: const Text("Sign Out"),
                 ),
               ),
             ],
