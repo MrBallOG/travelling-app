@@ -24,7 +24,7 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => settingsController),
-      ChangeNotifierProvider(create: (context) => GoogleSingInController())
+      Provider(create: (context) => GoogleSingInController())
     ],
     child: const MyApp(),
   ));
