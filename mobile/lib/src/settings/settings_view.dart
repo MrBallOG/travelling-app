@@ -17,33 +17,38 @@ class SettingsView extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 0, 0),
-                child: Consumer<SettingsController>(
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Select theme mode",
+                  textScaleFactor: 1,
+                ),
+                Consumer<SettingsController>(
                   builder: (context, controller, child) =>
                       DropdownButton<ThemeMode>(
                     value: controller.themeMode,
                     onChanged: controller.updateThemeMode,
                     items: const [
                       DropdownMenuItem(
-                        value: ThemeMode.system,
-                        child: Text('System Theme'),
-                      ),
-                      DropdownMenuItem(
                         value: ThemeMode.light,
-                        child: Text('Light Theme'),
+                        child: Text('Light'),
                       ),
                       DropdownMenuItem(
                         value: ThemeMode.dark,
-                        child: Text('Dark Theme'),
+                        child: Text('Dark'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text('System'),
                       )
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -79,7 +84,7 @@ class SettingsView extends StatelessWidget {
                       messenger.showSnackBar(snackBar);
                     }
                   },
-                  child: const Text("Sign Out"),
+                  child: const Text("Sign out"),
                 ),
               ),
             ],
