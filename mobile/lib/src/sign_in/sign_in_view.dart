@@ -92,7 +92,7 @@ class _SignInViewState extends State<SignInView> {
                                   package: "flutter_signin_button"),
                             ),
                             Text(
-                              "Sing in with Google",
+                              "Sign in with Google",
                               style: TextStyle(color: Colors.black),
                             ),
                           ],
