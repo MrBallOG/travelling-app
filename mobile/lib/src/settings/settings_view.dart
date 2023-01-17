@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
+import 'package:mobile/src/sign_in/sign_in_view.dart' show SignInView;
 import 'package:provider/provider.dart';
 
 import 'settings_controller.dart';
@@ -79,7 +80,7 @@ class SettingsView extends StatelessWidget {
                       );
                       messenger.showSnackBar(snackBar);
                       await navigator.pushNamedAndRemoveUntil(
-                          "/sign_in", (r) => false);
+                          SignInView.routeName, (r) => false);
                     } catch (_) {
                       const snackBar = SnackBar(
                         content: Text("Failed to sign out"),

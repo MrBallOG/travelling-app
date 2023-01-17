@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:mobile/src/profile/profile_view.dart';
+import 'package:mobile/src/main_view/main_view.dart';
 import 'package:mobile/src/sign_in/sign_in_view.dart';
 import 'package:provider/provider.dart';
 
@@ -82,10 +82,10 @@ class MyApp extends StatelessWidget {
                         continue def;
                       case SampleItemListView.routeName:
                         return const SampleItemListView();
-                      case ProfileView.routeName:
+                      case MainView.routeName:
                       def:
                       default:
-                        return const ProfileView();
+                        return const MainView();
                     }
                   }
                 },

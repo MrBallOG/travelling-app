@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/src/profile/profile_view.dart';
+import 'package:mobile/src/main_view/main_view.dart' show MainView;
 import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -106,8 +106,7 @@ class _SignInViewState extends State<SignInView> {
                                 Provider.of<GoogleSingInController>(context,
                                     listen: false);
                             await singInController.signIn();
-                            await navigator
-                                .popAndPushNamed(ProfileView.routeName);
+                            await navigator.popAndPushNamed(MainView.routeName);
                           } catch (_) {
                             unSetLoading();
                             const snackBar = SnackBar(
