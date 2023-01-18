@@ -12,12 +12,20 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  int viewIndex = 0;
-  List<Widget> views = const [
-    ProfileView(),
-    SampleItemListView(),
-  ];
-  PageController pageController = PageController(initialPage: 0);
+  late int viewIndex;
+  late List<Widget> views;
+  late PageController pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    viewIndex = 0;
+    views = const [
+      ProfileView(),
+      SampleItemListView(),
+    ];
+    pageController = PageController(initialPage: viewIndex);
+  }
 
   @override
   void dispose() {
