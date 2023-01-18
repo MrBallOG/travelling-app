@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/src/settings/settings_view.dart';
-// import 'package:provider/provider.dart';
+import 'package:mobile/src/profile/profile_view.dart' show ProfileView;
+import 'package:mobile/src/sample_feature/sample_item_list_view.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -14,50 +13,62 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
   int viewIndex = 0;
-  List<Widget> views = [];
+  List<Widget> views = const [ProfileView(), SampleItemListView()];
+  PageController pageController = PageController(initialPage: 0);
 
-  // addOne() {
-  //   setState(() {
-  //     counter += 1;
-  //   });
-  // }
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
+  changeView(int index) {
+    setState(
+      () {
+        viewIndex = index;
+        pageController.animateToPage(
+          index,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        );
+      },
+    );
+  }
+
+  changeIndex(int index) {
+    setState(
+      () {
+        viewIndex = index;
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.restorablePushNamed(context, SettingsView.routeName);
-            },
+      body: PageView.builder(
+        controller: pageController,
+        onPageChanged: (index) => changeIndex(index),
+        //physics: const NeverScrollableScrollPhysics(),
+        itemCount: views.length,
+        itemBuilder: (context, index) => views[index],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: viewIndex,
+        onTap: (index) => changeView(index),
+        //type: BottomNavigationBarType.shifting,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "Profile",
+            backgroundColor: Colors.orange,
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.star),
+            label: "Badges",
+            backgroundColor: Colors.yellow,
           ),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: NetworkImage(user.photoURL!),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                user.displayName!,
-                textScaleFactor: 1.5,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
