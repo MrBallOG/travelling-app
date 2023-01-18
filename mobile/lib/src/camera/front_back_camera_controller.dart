@@ -1,14 +1,14 @@
 import 'package:camera/camera.dart';
 
 class FrontBackCameraController {
-  late List<CameraDescription> _cameras;
-  late CameraDescription _frontCamera;
-  late CameraDescription _backCamera;
+  static late List<CameraDescription> _cameras;
+  static late CameraDescription _frontCamera;
+  static late CameraDescription _backCamera;
 
-  CameraDescription get frontCamera => _frontCamera;
-  CameraDescription get backCamera => _backCamera;
+  static CameraDescription get frontCamera => _frontCamera;
+  static CameraDescription get backCamera => _backCamera;
 
-  Future<void> loadCameras() async {
+  static Future<void> loadCameras() async {
     _cameras = await availableCameras();
     _frontCamera = _cameras.firstWhere(
         (camera) => camera.lensDirection == CameraLensDirection.front);

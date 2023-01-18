@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/src/camera/camera_view.dart';
 import 'package:mobile/src/profile/profile_view.dart' show ProfileView;
 import 'package:mobile/src/sample_feature/sample_item_list_view.dart';
 
@@ -19,8 +20,9 @@ class _MainViewState extends State<MainView> {
   @override
   void initState() {
     super.initState();
-    viewIndex = 0;
+    viewIndex = 1;
     views = const [
+      CameraView(),
       ProfileView(),
       SampleItemListView(),
     ];
@@ -64,6 +66,10 @@ class _MainViewState extends State<MainView> {
         onTap: (index) => changeView(index),
         type: BottomNavigationBarType.fixed,
         items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt),
+            label: "Camera",
+          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: "Profile",
