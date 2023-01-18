@@ -12,10 +12,10 @@ class SampleItemDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Item ${id.toString()} Details'),
+        title: Text('Badge ${id.toString()} Details'),
       ),
       body: Center(
-        child: Text('More Information about Item ${id.toString()} Here'),
+        child: Text('More Information about Badge ${id.toString()} Here'),
       ),
     );
   }

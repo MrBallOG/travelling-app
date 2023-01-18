@@ -49,24 +49,20 @@ class _MainViewState extends State<MainView> {
       body: PageView.builder(
         controller: pageController,
         onPageChanged: (index) => changeIndex(index),
-        //physics: const NeverScrollableScrollPhysics(),
         itemCount: views.length,
         itemBuilder: (context, index) => views[index],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: viewIndex,
         onTap: (index) => changeView(index),
-        //type: BottomNavigationBarType.shifting,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: "Profile",
-            backgroundColor: Colors.orange,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.star),
             label: "Badges",
-            backgroundColor: Colors.yellow,
           ),
         ],
       ),
