@@ -22,7 +22,7 @@ class _CameraViewState extends State<CameraView> {
     super.initState();
     frontCamera = FrontBackCameraController.frontCamera;
     backCamera = FrontBackCameraController.backCamera;
-    controller = CameraController(frontCamera, ResolutionPreset.veryHigh);
+    controller = CameraController(backCamera, ResolutionPreset.veryHigh);
     initializeControllerFuture = controller.initialize();
   }
 
