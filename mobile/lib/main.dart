@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mobile/src/camera/front_back_camera_controller.dart';
 import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
 import 'package:mobile/src/storage/local_storage.dart';
 import 'package:provider/provider.dart';
@@ -14,11 +15,13 @@ void main() async {
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
   final settingsController = SettingsController(SettingsService());
+  final frontBackCameraController = FrontBackCameraController();
 
   // Load the user's preferred theme while the splash screen is displayed.
   // This prevents a sudden theme change when the app is first displayed.
   await LocalStorage.initLocalStorage();
   await settingsController.loadSettings();
+  await frontBackCameraController.loadCameras();
 
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
@@ -26,6 +29,7 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (context) => settingsController),
+      Provider(create: (context) => frontBackCameraController),
       Provider(create: (context) => GoogleSingInController()),
     ],
     child: const MyApp(),

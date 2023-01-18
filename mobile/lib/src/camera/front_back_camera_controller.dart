@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 
-class CameraController {
+class FrontBackCameraController {
   late List<CameraDescription> _cameras;
   late CameraDescription _frontCamera;
   late CameraDescription _backCamera;
