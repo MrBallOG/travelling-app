@@ -13,7 +13,10 @@ class MainView extends StatefulWidget {
 
 class _MainViewState extends State<MainView> {
   int viewIndex = 0;
-  List<Widget> views = const [ProfileView(), SampleItemListView()];
+  List<Widget> views = const [
+    ProfileView(),
+    SampleItemListView(),
+  ];
   PageController pageController = PageController(initialPage: 0);
 
   @override
@@ -26,11 +29,7 @@ class _MainViewState extends State<MainView> {
     setState(
       () {
         viewIndex = index;
-        pageController.animateToPage(
-          index,
-          duration: const Duration(milliseconds: 600),
-          curve: Curves.easeInOut,
-        );
+        pageController.jumpToPage(index);
       },
     );
   }
@@ -55,6 +54,7 @@ class _MainViewState extends State<MainView> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: viewIndex,
         onTap: (index) => changeView(index),
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
