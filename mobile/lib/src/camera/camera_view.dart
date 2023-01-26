@@ -11,10 +11,10 @@ class CameraView extends StatefulWidget {
   State<StatefulWidget> createState() => _CameraViewState();
 }
 
-class _CameraViewState extends State<CameraView> {
+class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   late CameraDescription frontCamera;
   late CameraDescription backCamera;
-  late CameraController controller;
+  late CameraController? controller;
   late Future<void> initializeControllerFuture;
 
   @override
@@ -22,14 +22,44 @@ class _CameraViewState extends State<CameraView> {
     super.initState();
     frontCamera = FrontBackCameraController.frontCamera;
     backCamera = FrontBackCameraController.backCamera;
-    controller = CameraController(backCamera, ResolutionPreset.veryHigh);
-    initializeControllerFuture = controller.initialize();
+    initCamera();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    controller.dispose();
+    controller?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  void initCamera() {
+    controller = CameraController(backCamera, ResolutionPreset.veryHigh);
+    setInitializeControllerFuture();
+  }
+
+  void setInitializeControllerFuture() {
+    setState(() {
+      initializeControllerFuture = controller!.initialize();
+    });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (controller == null || !controller!.value.isInitialized) {
+      return;
+    }
+
+    if (state == AppLifecycleState.resumed) {
+      initCamera();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (controller != null) {
+        controller?.dispose();
+        //controller = null;
+      }
+    }
   }
 
   @override
@@ -42,7 +72,7 @@ class _CameraViewState extends State<CameraView> {
         future: initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(controller);
+            return CameraPreview(controller!);
           } else {
             return const Center(child: CircularProgressIndicator());
           }
@@ -56,7 +86,7 @@ class _CameraViewState extends State<CameraView> {
 
             // Attempt to take a picture and get the file `image`
             // where it was saved.
-            final image = await controller.takePicture();
+            final image = await controller!.takePicture();
 
             if (!mounted) return;
 
