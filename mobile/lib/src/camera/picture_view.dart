@@ -12,6 +12,17 @@ class PictureView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Picture')),
       body: Image.file(File(imagePath)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: SizedBox(
+        width: 80,
+        height: 80,
+        child: FloatingActionButton(
+          onPressed: () {
+            print("sending to api");
+          },
+          child: const Icon(Icons.send),
+        ),
+      ),
     );
   }
 }
