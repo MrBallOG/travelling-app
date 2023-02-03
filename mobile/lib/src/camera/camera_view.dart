@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:mobile/src/camera/front_back_camera_controller.dart'
-    show FrontBackCameraController;
+import 'package:mobile/src/camera/cameras_controller.dart'
+    show CamerasController;
 import 'package:mobile/src/camera/picture_view.dart';
 
 class CameraView extends StatefulWidget {
@@ -12,16 +12,12 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
-  late CameraDescription frontCamera;
-  late CameraDescription backCamera;
   late CameraController? controller;
   late Future<void> initializeControllerFuture;
 
   @override
   void initState() {
     super.initState();
-    frontCamera = FrontBackCameraController.frontCamera;
-    backCamera = FrontBackCameraController.backCamera;
     initCamera();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -34,7 +30,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   void initCamera() {
-    controller = CameraController(backCamera, ResolutionPreset.veryHigh);
+    controller = CamerasController.cameraContoller;
     setInitializeControllerFuture();
   }
 
@@ -47,9 +43,9 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (controller == null || !controller!.value.isInitialized) {
-      return;
-    }
+    if (controller == null || !controller!.value.isInitialized) return;
+
+    if (!mounted) return;
 
     if (state == AppLifecycleState.resumed) {
       initCamera();
@@ -72,38 +68,100 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         future: initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(controller!);
+            final size = MediaQuery.of(context).size;
+            // final screenAspectRatio = MediaQuery.of(context).size.aspectRatio;
+            final controllerAspectRatio = controller!.value.aspectRatio;
+
+            // var scale = screenAspectRatio * controllerAspectRatio;
+            // if (scale < 1) scale = 1 / scale;
+
+            // return Transform.scale(
+            //   scale: scale,
+            //   child: Center(child: CameraPreview(controller!)),
+            // );
+            return AspectRatio(
+              aspectRatio: 1 / controller!.value.aspectRatio,
+              child: CameraPreview(controller!),
+            );
+            //final size = MediaQuery.of(context).size;
+            // return ClipRect(
+            //   child: OverflowBox(
+            //     alignment: Alignment.center,
+            //     child: FittedBox(
+            //       fit: BoxFit.cover,
+            //       child: SizedBox(
+            //         height: 1,
+            //         child: AspectRatio(
+            //           aspectRatio: 1 / controller!.value.aspectRatio,
+            //           child: CameraPreview(controller!),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // );
+            // return FittedBox(
+            //   fit: BoxFit.fitWidth,
+            //   child: SizedBox(
+            //     width: size.width,
+            //     //height: size.width / controller!.value.aspectRatio,
+            //     child: CameraPreview(controller!),
+            //   ),
+            // );
           } else {
             return const Center(child: CircularProgressIndicator());
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          try {
-            // Ensure that the camera is initialized.
-            await initializeControllerFuture;
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Row(
+        children: [
+          const Spacer(),
+          Expanded(
+            child: SizedBox(
+              width: 80,
+              height: 80,
+              child: FloatingActionButton(
+                heroTag: "take_pic",
+                onPressed: () async {
+                  try {
+                    // Ensure that the camera is initialized.
+                    await initializeControllerFuture;
 
-            // Attempt to take a picture and get the file `image`
-            // where it was saved.
-            final image = await controller!.takePicture();
+                    // Attempt to take a picture and get the file `image`
+                    // where it was saved.
+                    final image = await controller!.takePicture();
 
-            if (!mounted) return;
+                    if (!mounted) return;
 
-            // If the picture was taken, display it on a new screen.
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => PictureView(
-                  imagePath: image.path,
-                ),
+                    // If the picture was taken, display it on a new screen.
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PictureView(
+                          imagePath: image.path,
+                        ),
+                      ),
+                    );
+                  } catch (e) {
+                    //TODO show snackabr
+                    print(e);
+                  }
+                },
+                child: const Icon(Icons.camera_alt),
               ),
-            );
-          } catch (e) {
-            //TODO show snackabr
-            print(e);
-          }
-        },
-        child: const Icon(Icons.camera_alt),
+            ),
+          ),
+          Expanded(
+            child: FloatingActionButton(
+              heroTag: "toggle_camera",
+              onPressed: () async {
+                CamerasController.toggleCamera();
+                initCamera();
+                await CamerasController.updateCamera();
+              },
+              child: const Icon(Icons.autorenew_rounded),
+            ),
+          )
+        ],
       ),
     );
   }

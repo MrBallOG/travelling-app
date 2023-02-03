@@ -1,18 +1,33 @@
 import 'package:camera/camera.dart';
+import 'package:mobile/src/camera/cameras_service.dart';
 
 class CamerasController {
-  static late List<CameraDescription> _cameras;
-  static late CameraDescription _frontCamera;
-  static late CameraDescription _backCamera;
+  static final CamerasService _camerasService = CamerasService();
+  static late CameraDescription _camera;
+  static late String _cameraString;
 
-  static CameraDescription get frontCamera => _frontCamera;
-  static CameraDescription get backCamera => _backCamera;
+  static CameraController get cameraContoller =>
+      CameraController(_camera, ResolutionPreset.high);
 
   static Future<void> loadCameras() async {
-    _cameras = await availableCameras();
-    _frontCamera = _cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.front);
-    _backCamera = _cameras.firstWhere(
-        (camera) => camera.lensDirection == CameraLensDirection.back);
+    await _camerasService.loadCameras();
+    _camera = _camerasService.camera();
+  }
+
+  static void toggleCamera() {
+    switch (_camera.lensDirection) {
+      case CameraLensDirection.front:
+        _camera = _camerasService.backCamera;
+        _cameraString = "back";
+        break;
+      default:
+        _camera = _camerasService.frontCamera;
+        _cameraString = "front";
+        break;
+    }
+  }
+
+  static Future<void> updateCamera() async {
+    await _camerasService.updateCamera(_cameraString);
   }
 }
