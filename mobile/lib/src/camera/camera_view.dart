@@ -1,8 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'package:mobile/src/camera/cameras_controller.dart'
-    show CamerasController;
-import 'package:mobile/src/camera/picture_view.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:mobile/src/main_view/main_view.dart' show MainView;
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key});
@@ -12,51 +11,39 @@ class CameraView extends StatefulWidget {
 }
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
-  late CameraController? controller;
-  late Future<void> initializeControllerFuture;
+  final ImagePicker picker = ImagePicker();
+  late Future<XFile> futurePicture = getPicture();
 
   @override
   void initState() {
     super.initState();
-    initCamera();
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    controller?.dispose();
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  void initCamera() {
-    controller = CamerasController.cameraContoller;
-    setInitializeControllerFuture();
-  }
+  Future<XFile> getPicture() async {
+    final response = await picker.retrieveLostData();
 
-  void setInitializeControllerFuture() {
-    setState(() {
-      initializeControllerFuture = controller!.initialize();
-    });
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (controller == null || !controller!.value.isInitialized) return;
-
-    if (!mounted) return;
-
-    if (state == AppLifecycleState.resumed) {
-      initCamera();
-    } else if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.inactive) {
-      if (controller != null) {
-        controller?.dispose();
-        //controller = null;
-      }
+    if (!response.isEmpty &&
+        response.file != null &&
+        response.type == RetrieveType.image) {
+      return Future.value(response.file);
+    } else {
+      return Future.value(await picker.pickImage(source: ImageSource.camera));
     }
   }
+
+  // Future<void> pictureCallback(BuildContext context, String imagePath) async {
+  //   await Future.value(Navigator.restorablePushNamed(
+  //       context, PictureView.routeName,
+  //       arguments: imagePath));
+  //   // Navigator.restorablePushNamed(context, PictureView.routeName,
+  //   //     arguments: imagePath);
+  //   futurePicture = getPicture();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -64,104 +51,59 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       appBar: AppBar(
         title: const Text('Camera'),
       ),
-      body: FutureBuilder<void>(
-        future: initializeControllerFuture,
+      body: FutureBuilder<XFile>(
+        future: futurePicture,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            final size = MediaQuery.of(context).size;
-            // final screenAspectRatio = MediaQuery.of(context).size.aspectRatio;
-            final controllerAspectRatio = controller!.value.aspectRatio;
-
-            // var scale = screenAspectRatio * controllerAspectRatio;
-            // if (scale < 1) scale = 1 / scale;
-
-            // return Transform.scale(
-            //   scale: scale,
-            //   child: Center(child: CameraPreview(controller!)),
-            // );
-            return AspectRatio(
-              aspectRatio: 1 / controller!.value.aspectRatio,
-              child: CameraPreview(controller!),
-            );
-            //final size = MediaQuery.of(context).size;
-            // return ClipRect(
-            //   child: OverflowBox(
-            //     alignment: Alignment.center,
-            //     child: FittedBox(
-            //       fit: BoxFit.cover,
-            //       child: SizedBox(
-            //         height: 1,
-            //         child: AspectRatio(
-            //           aspectRatio: 1 / controller!.value.aspectRatio,
-            //           child: CameraPreview(controller!),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // );
-            // return FittedBox(
-            //   fit: BoxFit.fitWidth,
-            //   child: SizedBox(
-            //     width: size.width,
-            //     //height: size.width / controller!.value.aspectRatio,
-            //     child: CameraPreview(controller!),
-            //   ),
-            // );
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Row(
-        children: [
-          const Spacer(),
-          Expanded(
-            child: SizedBox(
-              width: 80,
-              height: 80,
-              child: FloatingActionButton(
-                heroTag: "take_pic",
-                onPressed: () async {
-                  try {
-                    // Ensure that the camera is initialized.
-                    await initializeControllerFuture;
-
-                    // Attempt to take a picture and get the file `image`
-                    // where it was saved.
-                    final image = await controller!.takePicture();
-
-                    if (!mounted) return;
-
-                    // If the picture was taken, display it on a new screen.
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => PictureView(
-                          imagePath: image.path,
+          if (snapshot.hasData) {
+            //return Image.file(File(snapshot.data!.path));
+            // WidgetsBinding.instance.addPostFrameCallback((_) =>
+            //     Navigator.restorablePushNamed(context, PictureView.routeName,
+            //         arguments: snapshot.data!.path));
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.file(File(snapshot.data!.path)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(60.0),
+                          ),
+                          backgroundColor: Colors.red,
                         ),
+                        child: const Icon(Icons.close),
+                        onPressed: () => {},
                       ),
-                    );
-                  } catch (e) {
-                    //TODO show snackabr
-                    print(e);
-                  }
-                },
-                child: const Icon(Icons.camera_alt),
-              ),
-            ),
-          ),
-          Expanded(
-            child: FloatingActionButton(
-              heroTag: "toggle_camera",
-              onPressed: () async {
-                CamerasController.toggleCamera();
-                initCamera();
-                await CamerasController.updateCamera();
-              },
-              child: const Icon(Icons.autorenew_rounded),
-            ),
-          )
-        ],
+                    ),
+                    SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(60.0),
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                        child: const Icon(Icons.check),
+                        onPressed: () => {},
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          } else if (snapshot.hasError) {
+            WidgetsBinding.instance.addPostFrameCallback((_) =>
+                Navigator.of(context).popAndPushNamed(MainView.routeName));
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
       ),
     );
   }

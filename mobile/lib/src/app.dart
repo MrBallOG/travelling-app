@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mobile/src/main_view/main_view.dart';
 import 'package:mobile/src/sign_in/sign_in_view.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 import 'sample_feature/sample_item_details_view.dart';
 import 'sample_feature/sample_item_list_view.dart';
@@ -21,6 +22,8 @@ class MyApp extends StatelessWidget {
     //
     // The AnimatedBuilder Widget listens to the SettingsController for changes.
     // Whenever the user updates their settings, the MaterialApp is rebuilt.
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     return Consumer<SettingsController>(
       builder: (context, settingsController, child) => AnimatedBuilder(
         animation: settingsController,
