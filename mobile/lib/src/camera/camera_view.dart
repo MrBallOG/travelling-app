@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/src/main_view/main_view.dart' show MainView;
 
@@ -99,8 +100,17 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
               ],
             );
           } else if (snapshot.hasError) {
-            WidgetsBinding.instance.addPostFrameCallback((_) =>
-                Navigator.of(context).popAndPushNamed(MainView.routeName));
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (snapshot.error is PlatformException) {
+                final messenger = ScaffoldMessenger.of(context);
+                const snackBar = SnackBar(
+                  content: Text("Camera is not available"),
+                  duration: Duration(seconds: 3),
+                );
+                messenger.showSnackBar(snackBar);
+              }
+              Navigator.of(context).popAndPushNamed(MainView.routeName);
+            });
           }
           return const Center(child: CircularProgressIndicator());
         },
