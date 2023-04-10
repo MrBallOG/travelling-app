@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/src/main_view/main_view.dart' show MainView;
+import 'package:geolocator/geolocator.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key});
+
+  static const routeName = '/camera';
 
   @override
   State<StatefulWidget> createState() => _CameraViewState();
@@ -37,6 +40,37 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       return Future.value(
           await picker.pickImage(source: ImageSource.camera, maxWidth: width));
     }
+  }
+
+  Future<Position> determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Turn on location services');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error(
+            'Location permissions are neccessary for app usage');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location permissions are neccessary for app usage');
+    }
+
+    final accuracy = await Geolocator.getLocationAccuracy();
+    if (accuracy == LocationAccuracyStatus.reduced) {
+      return Future.error('Turn on precise location');
+    }
+
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.best);
   }
 
   @override
@@ -86,7 +120,24 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                               backgroundColor: Colors.green,
                             ),
                             child: const Icon(Icons.check),
-                            onPressed: () => {},
+                            onPressed: () async {
+                              final messenger = ScaffoldMessenger.of(context);
+                              final navigator = Navigator.of(context);
+                              try {
+                                final position = await determinePosition();
+                                print(
+                                    "${position.latitude} ${position.longitude}");
+                                //TODO send a request to backend and show city info
+                                //navigator.popAndPushNamed(MainView.routeName);
+                              } catch (e) {
+                                final snackBar = SnackBar(
+                                  content: Text(e.toString()),
+                                  duration: const Duration(seconds: 3),
+                                );
+                                messenger.showSnackBar(snackBar);
+                                navigator.popAndPushNamed(MainView.routeName);
+                              }
+                            },
                           ),
                         ),
                       ],

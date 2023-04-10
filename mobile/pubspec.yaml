@@ -11,12 +11,14 @@ environment:
 
 dependencies:
   firebase_auth: ^4.2.4
+  firebase_core: ^2.9.0
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
   flutter_secure_storage: ^7.0.0
   flutter_signin_button: ^2.0.0
+  geolocator: ^9.0.2
   google_sign_in: ^5.4.2
   image_picker: ^0.8.7+1
   path: ^1.8.2

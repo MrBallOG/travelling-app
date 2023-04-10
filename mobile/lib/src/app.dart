@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:mobile/src/camera/camera_view.dart';
 import 'package:mobile/src/main_view/main_view.dart';
+import 'package:mobile/src/profile/profile_view.dart';
 import 'package:mobile/src/sign_in/sign_in_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -76,6 +78,10 @@ class MyApp extends StatelessWidget {
                     final arguments = routeSettings.arguments;
 
                     switch (routeSettings.name) {
+                      case CameraView.routeName:
+                        return const CameraView();
+                      case ProfileView.routeName:
+                        return const ProfileView();
                       case SettingsView.routeName:
                         return const SettingsView();
                       case SampleItemDetailsView.routeName:

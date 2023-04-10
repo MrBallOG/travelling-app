@@ -61,24 +61,36 @@ class _MainViewState extends State<MainView> {
         itemCount: views.length,
         itemBuilder: (context, index) => views[index],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: viewIndex,
-        onTap: (index) => changeView(index),
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: "Camera",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Profile",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.star),
-            label: "Badges",
-          ),
-        ],
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor,
+              blurRadius: 30,
+              offset: const Offset(0, 22),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          currentIndex: viewIndex,
+          onTap: (index) => changeView(index),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.camera_alt),
+              label: "Camera",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Profile",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.star),
+              label: "Badges",
+            ),
+          ],
+        ),
       ),
     );
   }

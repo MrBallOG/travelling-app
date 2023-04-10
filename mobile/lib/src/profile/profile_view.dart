@@ -5,6 +5,8 @@ import 'package:mobile/src/settings/settings_view.dart';
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
+  static const routeName = '/profile';
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser!;
