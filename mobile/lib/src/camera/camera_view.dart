@@ -29,7 +29,12 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   Future<XFile> getPicture() async {
-    final width = MediaQuery.of(context).size.width;
+    final mediaQuery = MediaQuery.of(context);
+    final topPadding = mediaQuery.padding.top;
+    final size = mediaQuery.size;
+    final width = size.width;
+    final height =
+        size.height - kBottomNavigationBarHeight - kToolbarHeight - topPadding;
     final response = await picker.retrieveLostData();
 
     if (!response.isEmpty &&
@@ -38,7 +43,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       return Future.value(response.file);
     } else {
       return Future.value(await picker.pickImage(
-          source: ImageSource.camera, maxWidth: width, imageQuality: 90));
+          source: ImageSource.camera,
+          maxWidth: width,
+          maxHeight: height,
+          imageQuality: 80));
     }
   }
 
