@@ -37,8 +37,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         response.type == RetrieveType.image) {
       return Future.value(response.file);
     } else {
-      return Future.value(
-          await picker.pickImage(source: ImageSource.camera, maxWidth: width));
+      return Future.value(await picker.pickImage(
+          source: ImageSource.camera, maxWidth: width, imageQuality: 90));
     }
   }
 
