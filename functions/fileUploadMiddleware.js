@@ -6,12 +6,18 @@ const {v4} = require("uuid");
 const functions = require("firebase-functions");
 
 exports.filesUpload = function(req, res, next) {
-  const bb = busboy({
-    headers: req.headers,
-    limits: {
-      fileSize: 5 * 1024 * 1024,
-    },
-  });
+  let bb;
+  try {
+    bb = busboy({
+      headers: req.headers,
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+    });
+  } catch (err) {
+    err.statusCode = 400;
+    return next(err);
+  }
 
   const fields = {};
   const files = [];
@@ -19,6 +25,7 @@ exports.filesUpload = function(req, res, next) {
   // Note: os.tmpdir() points to an in-memory file system on GCF
   // Thus, any files in it must fit in the instance's memory.
   const tmpdir = os.tmpdir();
+  let fileAttached = false;
 
   bb.on("field", (name, val, info) => {
     // You could do additional deserialization logic here, values will just be
@@ -27,6 +34,7 @@ exports.filesUpload = function(req, res, next) {
   });
 
   bb.on("file", (name, file, info) => {
+    fileAttached = true;
     const fileName = v4() + ".jpeg";
     const filepath = path.join(tmpdir, fileName);
     const writeStream = fs.createWriteStream(filepath);
@@ -66,6 +74,11 @@ exports.filesUpload = function(req, res, next) {
   });
 
   bb.on("finish", () => {
+    if (!fileAttached) {
+      const err = new Error("No file attached");
+      err.statusCode = 400;
+      return next(err);
+    }
     Promise.all(fileWrites)
         .then(() => {
           req.body = fields;
@@ -75,10 +88,10 @@ exports.filesUpload = function(req, res, next) {
         .catch(next);
   });
 
-  // bb.end(req.rawBody);
-  if (req.rawBody) {
-    bb.end(req.rawBody);
-  } else {
-    req.pipe(bb);
-  }
+  bb.end(req.rawBody);
+  // if (req.rawBody) {
+  //   bb.end(req.rawBody);
+  // } else {
+  //   req.pipe(bb);
+  // }
 };

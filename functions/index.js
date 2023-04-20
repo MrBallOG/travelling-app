@@ -4,7 +4,6 @@ const {Timestamp} = require("firebase-admin/firestore");
 const express = require("express");
 const cors = require("cors");
 const {filesUpload} = require("./fileUploadMiddleware");
-// const formidable = require("formidable");
 const fs = require("fs");
 const path = require("path");
 
@@ -36,42 +35,18 @@ app.post("/photo", filesUpload, (req, res, next) => {
   });
   res.send("created");
 });
-// app.post("/photo", async (req, res, next) => {
-//   const form = formidable(formOptions);
-//   await new Promise((resolve, reject) => {
-//     form.parse(req, (err, fields, files) => {
-//       if (err) {
-//         functions.logger.error("Parser error");
-//         next(err);
-//         return;
-//       }
-//       functions.logger.info("Parser ok");
-//       res.send("created");
-//     // res.json({fields, files});
-//     });
-//     // form.on("file", (formname, file) => {
-//     //   functions.logger.info("Parser OK");
-//     //   res.send("created");
-//     // });
-//   });
-//   // const uploadDir = path.resolve(__dirname, "./uploads/");
-//   // if (!fs.existsSync(uploadDir)) {
-//   //   fs.mkdir(uploadDir);
-//   // }
-//   // fs.writeFile(uploadDir, req.file.buffer, (err) => {
-//   //   if (err) {
-//   //     next(err);
-//   //   }
-//   // });
-//   // functions.logger.info("Parser okkkkk");
-//   // res.send("created");
-// });
+
+app.use((err, req, res, next) => {
+  if (err.statusCode === 400) {
+    functions.logger.info(err.message);
+    res.status(400).json({error: err.message});
+  } else {
+    functions.logger.error(err.message);
+    res.status(500).json({error: "Server error"});
+  }
+});
 
 exports.api = functions.https.onRequest(app);
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
 
 // const warsaw = {
 //   continent: "Europe",
