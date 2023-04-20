@@ -16,7 +16,7 @@ class CameraView extends StatefulWidget {
 
 class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   final ImagePicker picker = ImagePicker();
-  late Future<XFile> futurePicture = getPicture();
+  late Future<XFile> futurePhoto = getPhoto();
 
   @override
   void initState() {
@@ -28,7 +28,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  Future<XFile> getPicture() async {
+  Future<XFile> getPhoto() async {
     final mediaQuery = MediaQuery.of(context);
     final topPadding = mediaQuery.padding.top;
     final size = mediaQuery.size;
@@ -88,7 +88,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         title: const Text('Camera'),
       ),
       body: FutureBuilder<XFile>(
-        future: futurePicture,
+        future: futurePhoto,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return Stack(
@@ -113,7 +113,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                             ),
                             child: const Icon(Icons.close),
                             onPressed: () => setState(() {
-                              futurePicture = getPicture();
+                              futurePhoto = getPhoto();
                             }),
                           ),
                         ),
