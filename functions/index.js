@@ -14,26 +14,16 @@ const app = express();
 
 app.use(cors());
 
-// const formOptions = {
-//   allowEmptyFiles: false,
-//   maxFileSize: 5 * 1024 * 1024,
-//   multiples: false,
-//   uploadDir: __dirname,
-// };
-
-// api.get("/h")
-app.get("/h", (req, res) => res.send("hello there"));
-
 // authorization bearer token => req.headers.authorization
 app.post("/photo", filesUpload, (req, res, next) => {
   const uploadDir = path.join(__dirname, "ha.jpeg");
-  fs.writeFile(uploadDir, req.files[0].buffer, (err) => {
+  fs.writeFile(uploadDir, req.file.buffer, (err) => {
     if (err) {
       next(err);
     }
   });
   res.json({
-    fileName: req.files[0].fileName,
+    fileName: req.file.fileName,
     body: req.body,
   });
 });

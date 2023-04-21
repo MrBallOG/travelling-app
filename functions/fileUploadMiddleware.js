@@ -1,17 +1,14 @@
 const busboy = require("busboy");
-const fs = require("fs");
-const path = require("path");
-const os = require("os");
 const {v4} = require("uuid");
-const functions = require("firebase-functions");
 
 exports.filesUpload = function(req, res, next) {
   let bb;
+  const fileSize = 5 * 1024 * 1024;
   try {
     bb = busboy({
       headers: req.headers,
       limits: {
-        fileSize: 5 * 1024 * 1024,
+        fileSize: fileSize,
         fieldSize: 16,
         fieldNameSize: 16,
         fields: 2,
@@ -24,98 +21,81 @@ exports.filesUpload = function(req, res, next) {
   }
 
   const fields = {};
-  const files = [];
-  const fileWrites = [];
-  // Note: os.tmpdir() points to an in-memory file system on GCF
-  // Thus, any files in it must fit in the instance's memory.
-  const tmpdir = os.tmpdir();
+  const file = {};
   let fileAttached = false;
+  let err;
 
   bb.on("field", (name, val, info) => {
-    // You could do additional deserialization logic here, values will just be
-    // strings
-    fields[name] = val;
+    fields[name] = Number.parseFloat(val).toFixed(8);
   });
 
-  bb.on("file", (name, file, info) => {
+  bb.on("file", (name, stream, info) => {
+    if (info.mimeType !== "image/jpeg") {
+      stream.resume();
+      err = new Error("File must be a jpeg image");
+      err.statusCode = 400;
+      return;
+    }
+
     fileAttached = true;
-    const fileName = v4() + ".jpeg";
-    const filepath = path.join(tmpdir, fileName);
-    const writeStream = fs.createWriteStream(filepath);
-    functions.logger.info("name", filepath);
-    file.pipe(writeStream);
+    const bufferList = [];
+    let bufferLength = 0;
 
-    fileWrites.push(
-        new Promise((resolve, reject) => {
-          file.on("end", () => writeStream.end());
-          writeStream.on("finish", () => {
-            fs.readFile(filepath, (err, buffer) => {
-              const size = Buffer.byteLength(buffer);
-              if (err) {
-                return reject(err);
-              }
+    // stream.on("limit", () => {
+    //   const err = new Error(`File must be smaller than ${fileSize} bytes`);
+    //   err.statusCode = 400;
+    //   return next(err);
+    // });
 
-              files.push({
-                fileName,
-                encoding: info.encoding,
-                mimeType: info.mimeType,
-                buffer,
-                size,
-              });
+    stream.on("data", (chunk) => {
+      bufferList.push(chunk);
+      bufferLength += chunk.length;
+    });
 
-              try {
-                fs.unlinkSync(filepath);
-              } catch (error) {
-                return reject(error);
-              }
-
-              resolve();
-            });
-          });
-          writeStream.on("error", reject);
-        }),
-    );
+    stream.on("end", () => {
+      if (stream.truncated) {
+        err = new Error(`File must be smaller than ${fileSize} bytes`);
+        err.statusCode = 400;
+        return;
+      } else {
+        file.buffer = Buffer.concat(bufferList, bufferLength);
+        file.fileName = v4() + ".jpeg";
+      }
+    });
   });
 
   bb.on("finish", () => {
+    if (err) return next(err);
+
     if (!fileAttached) {
       const err = new Error("No file attached");
       err.statusCode = 400;
       return next(err);
     }
-    Promise.all(fileWrites)
-        .then(() => {
-          const hasLongitude = Object.prototype.hasOwnProperty.call(
-              fields, "longitude",
-          );
-          const hasLatitude = Object.prototype.hasOwnProperty.call(
-              fields, "latitude",
-          );
 
-          if (!hasLatitude || !hasLongitude) {
-            const err = new Error("Missing fields");
-            err.statusCode = 400;
-            return next(err);
-          }
+    const hasLongitude = Object.prototype.hasOwnProperty.call(
+        fields, "longitude",
+    );
+    const hasLatitude = Object.prototype.hasOwnProperty.call(
+        fields, "latitude",
+    );
 
-          const longitude = Number.parseFloat(fields.longitude).toFixed(8);
-          const latitude = Number.parseFloat(fields.latitude).toFixed(8);
+    if (!hasLatitude || !hasLongitude) {
+      const err = new Error("Missing fields");
+      err.statusCode = 400;
+      return next(err);
+    }
 
-          if (isNaN(longitude) || isNaN(latitude)) {
-            const err = new Error("Longitude and latitude must be floats");
-            err.statusCode = 400;
-            return next(err);
-          }
+    if (isNaN(fields.longitude) || isNaN(fields.latitude)) {
+      const err = new Error("Longitude and latitude must be floats");
+      err.statusCode = 400;
+      return next(err);
+    }
 
-          fields.longitude = longitude;
-          fields.latitude = latitude;
+    req.body = fields;
+    req.file = file;
 
-          req.body = fields;
-          req.files = files;
-
-          next();
-        })
-        .catch(next);
+    next();
   });
 
   bb.end(req.rawBody);
