@@ -41,12 +41,6 @@ exports.filesUpload = function(req, res, next) {
     const bufferList = [];
     let bufferLength = 0;
 
-    // stream.on("limit", () => {
-    //   const err = new Error(`File must be smaller than ${fileSize} bytes`);
-    //   err.statusCode = 400;
-    //   return next(err);
-    // });
-
     stream.on("data", (chunk) => {
       bufferList.push(chunk);
       bufferLength += chunk.length;
