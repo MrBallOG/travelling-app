@@ -4,6 +4,7 @@ const {Timestamp} = require("firebase-admin/firestore");
 const express = require("express");
 const cors = require("cors");
 const {fileUpload} = require("./fileUploadMiddleware");
+const {fileOperations} = require("./fileOperationsMiddleware");
 const fs = require("fs");
 const path = require("path");
 
@@ -15,7 +16,7 @@ const app = express();
 app.use(cors());
 
 // authorization bearer token => req.headers.authorization
-app.post("/photo", fileUpload, (req, res, next) => {
+app.post("/photo", fileUpload, fileOperations, (req, res, next) => {
   const uploadDir = path.join(__dirname, "ha.jpeg");
   fs.writeFile(uploadDir, req.file.buffer, (err) => {
     if (err) {
