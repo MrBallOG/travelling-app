@@ -1,7 +1,7 @@
 const busboy = require("busboy");
 const {v4} = require("uuid");
 
-exports.filesUpload = function(req, res, next) {
+exports.fileUpload = function(req, res, next) {
   let bb;
   const fileSize = 5 * 1024 * 1024;
   try {
@@ -53,7 +53,7 @@ exports.filesUpload = function(req, res, next) {
         return;
       } else {
         file.buffer = Buffer.concat(bufferList, bufferLength);
-        file.fileName = v4() + ".jpeg";
+        file.filename = v4() + ".jpeg";
       }
     });
   });
