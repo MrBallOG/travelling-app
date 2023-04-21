@@ -26,14 +26,16 @@ app.get("/h", (req, res) => res.send("hello there"));
 
 // authorization bearer token => req.headers.authorization
 app.post("/photo", filesUpload, (req, res, next) => {
-  functions.logger.info("Parser okkkkk");
   const uploadDir = path.join(__dirname, "ha.jpeg");
   fs.writeFile(uploadDir, req.files[0].buffer, (err) => {
     if (err) {
       next(err);
     }
   });
-  res.send("created");
+  res.json({
+    fileName: req.files[0].fileName,
+    body: req.body,
+  });
 });
 
 app.use((err, req, res, next) => {

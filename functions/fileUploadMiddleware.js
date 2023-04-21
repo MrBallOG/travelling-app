@@ -12,6 +12,10 @@ exports.filesUpload = function(req, res, next) {
       headers: req.headers,
       limits: {
         fileSize: 5 * 1024 * 1024,
+        fieldSize: 16,
+        fieldNameSize: 16,
+        fields: 2,
+        files: 1,
       },
     });
   } catch (err) {
@@ -81,8 +85,34 @@ exports.filesUpload = function(req, res, next) {
     }
     Promise.all(fileWrites)
         .then(() => {
+          const hasLongitude = Object.prototype.hasOwnProperty.call(
+              fields, "longitude",
+          );
+          const hasLatitude = Object.prototype.hasOwnProperty.call(
+              fields, "latitude",
+          );
+
+          if (!hasLatitude || !hasLongitude) {
+            const err = new Error("Missing fields");
+            err.statusCode = 400;
+            return next(err);
+          }
+
+          const longitude = Number.parseFloat(fields.longitude).toFixed(8);
+          const latitude = Number.parseFloat(fields.latitude).toFixed(8);
+
+          if (isNaN(longitude) || isNaN(latitude)) {
+            const err = new Error("Longitude and latitude must be floats");
+            err.statusCode = 400;
+            return next(err);
+          }
+
+          fields.longitude = longitude;
+          fields.latitude = latitude;
+
           req.body = fields;
           req.files = files;
+
           next();
         })
         .catch(next);
