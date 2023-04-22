@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/src/env_variables/env_variables.dart';
 import 'package:mobile/src/main_view/main_view.dart' show MainView;
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key});
@@ -134,11 +137,35 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                               final navigator = Navigator.of(context);
                               try {
                                 final position = await determinePosition();
-                                print(
-                                    "${position.latitude} ${position.longitude}");
-                                print(API_URL);
-                                //TODO send a request to backend and show city info
-                                //navigator.popAndPushNamed(MainView.routeName);
+
+                                final token = await FirebaseAuth
+                                    .instance.currentUser!
+                                    .getIdToken();
+                                var uri = Uri.parse("${API_URL}photo");
+                                var request = http.MultipartRequest('POST', uri)
+                                  ..headers['Authorization'] = 'Bearer $token'
+                                  ..fields['latitude'] =
+                                      position.latitude.toString()
+                                  ..fields['longitude'] =
+                                      position.longitude.toString()
+                                  ..files.add(await http.MultipartFile.fromPath(
+                                      'photo', snapshot.data!.path,
+                                      contentType: MediaType('image', 'jpeg')));
+                                var response = await request.send();
+                                if (response.statusCode == 200) {
+                                  const snackBar = SnackBar(
+                                    content: Text("Photo sent"),
+                                    duration: Duration(seconds: 3),
+                                  );
+                                  messenger.showSnackBar(snackBar);
+                                  navigator.popAndPushNamed(MainView.routeName);
+                                } else {
+                                  const snackBar = SnackBar(
+                                    content: Text("Something went wrong"),
+                                    duration: Duration(seconds: 3),
+                                  );
+                                  messenger.showSnackBar(snackBar);
+                                }
                               } catch (e) {
                                 final snackBar = SnackBar(
                                   content: Text(e.toString()),
