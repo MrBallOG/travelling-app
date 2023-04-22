@@ -1,43 +1,17 @@
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
+const {functions, db, bucket} = require("./firebaseExports");
 const {Timestamp} = require("firebase-admin/firestore");
 const express = require("express");
 const cors = require("cors");
+const {authorization} = require("./authorizationMiddleware");
 const {fileUpload} = require("./fileUploadMiddleware");
 const {fileOperations} = require("./fileOperationsMiddleware");
+const {errorResponse} = require("./errorResponseMiddleware");
 
-admin.initializeApp();
-
-const db = admin.firestore();
-const bucket = admin.storage().bucket();
-const auth = admin.auth();
 const app = express();
 
 app.use(cors());
 
-app.use(async (req, res, next) => {
-  const header = req.headers.authorization;
-  if (!header) {
-    const err = new Error("Missing authorization header");
-    err.statusCode = 401;
-    return next(err);
-  }
-  const headerArr = header.split(" ");
-  if (headerArr.length !== 2 || headerArr[0] !== "Bearer") {
-    const err = new Error("Authorization must be a bearer token");
-    err.statusCode = 401;
-    return next(err);
-  }
-  try {
-    const token = await auth.verifyIdToken(headerArr[1]);
-    req.uid = token.uid;
-    next();
-  } catch (_) {
-    const err = new Error("Invalid token");
-    err.statusCode = 401;
-    return next(err);
-  }
-});
+app.use(authorization);
 
 // authorization bearer token => req.headers.authorization
 app.post("/photo", fileUpload, fileOperations, async (req, res, next) => {
@@ -64,15 +38,7 @@ app.post("/photo", fileUpload, fileOperations, async (req, res, next) => {
   res.sendStatus(200);
 });
 
-app.use((err, req, res, next) => {
-  if ([400, 401].includes(err.statusCode)) {
-    functions.logger.info("USER-ERROR", err.message);
-    res.status(err.statusCode).json({error: err.message});
-  } else {
-    functions.logger.error("SERVER-ERROR", err.message);
-    res.status(500).json({error: "Server error"});
-  }
-});
+app.use(errorResponse);
 
 exports.api = functions.https.onRequest(app);
 
