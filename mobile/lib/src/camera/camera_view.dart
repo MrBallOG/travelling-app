@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile/src/env_variables/env_variables.dart';
 import 'package:mobile/src/main_view/main_view.dart' show MainView;
 import 'package:geolocator/geolocator.dart';
 
@@ -135,6 +136,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                 final position = await determinePosition();
                                 print(
                                     "${position.latitude} ${position.longitude}");
+                                print(API_URL);
                                 //TODO send a request to backend and show city info
                                 //navigator.popAndPushNamed(MainView.routeName);
                               } catch (e) {
