@@ -10,13 +10,38 @@ admin.initializeApp();
 
 const db = admin.firestore();
 const bucket = admin.storage().bucket();
+const auth = admin.auth();
 const app = express();
 
 app.use(cors());
 
+app.use(async (req, res, next) => {
+  const header = req.headers.authorization;
+  if (!header) {
+    const err = new Error("Missing authorization header");
+    err.statusCode = 401;
+    return next(err);
+  }
+  const headerArr = header.split(" ");
+  if (headerArr.length !== 2 || headerArr[0] !== "Bearer") {
+    const err = new Error("Authorization must be a bearer token");
+    err.statusCode = 401;
+    return next(err);
+  }
+  try {
+    const token = await auth.verifyIdToken(headerArr[1]);
+    req.uid = token.uid;
+    next();
+  } catch (_) {
+    const err = new Error("Invalid token");
+    err.statusCode = 401;
+    return next(err);
+  }
+});
+
 // authorization bearer token => req.headers.authorization
 app.post("/photo", fileUpload, fileOperations, async (req, res, next) => {
-  const uid = "Some uid";
+  const uid = req.uid;
   const metadata = {
     metadata: {
       uid: uid,
@@ -40,11 +65,11 @@ app.post("/photo", fileUpload, fileOperations, async (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err.statusCode === 400) {
-    functions.logger.info(err.message);
-    res.status(400).json({error: err.message});
+  if ([400, 401].includes(err.statusCode)) {
+    functions.logger.info("USER-ERROR", err.message);
+    res.status(err.statusCode).json({error: err.message});
   } else {
-    functions.logger.error(err.message);
+    functions.logger.error("SERVER-ERROR", err.message);
     res.status(500).json({error: "Server error"});
   }
 });
@@ -69,7 +94,7 @@ exports.api = functions.https.onRequest(app);
 // };
 
 // https://ajv.js.org/json-schema.html#keywords-for-numbers, https://express-validator.github.io/docs/custom-error-messages -> validation
-// firebase functions:shell => createUser({uid: "0UgNpe4TuhWEAu7E99LiJhk1E3G2"})
+// firebase functions:shell => createUser({uid: "some uid"})
 
 exports.createUser = functions.auth.user().onCreate(async (user) => {
   const newUser = {
