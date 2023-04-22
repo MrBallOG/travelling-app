@@ -26,7 +26,7 @@ exports.fileUpload = function(req, res, next) {
   let err;
 
   bb.on("field", (name, val, info) => {
-    fields[name] = Number.parseFloat(val).toFixed(8);
+    fields[name] = Number.parseFloat(val);
   });
 
   bb.on("file", (name, stream, info) => {
