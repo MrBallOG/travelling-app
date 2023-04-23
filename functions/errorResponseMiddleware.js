@@ -1,7 +1,7 @@
 const {functions} = require("./firebaseExports");
 
 exports.errorResponse = function(err, req, res, next) {
-  if ([400, 401].includes(err.statusCode)) {
+  if ([400, 401, 403].includes(err.statusCode)) {
     functions.logger.info("USER-ERROR", err.message);
     res.status(err.statusCode).json({error: err.message});
   } else {

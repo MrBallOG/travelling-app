@@ -6,6 +6,7 @@ const {authorization} = require("./authorizationMiddleware");
 const {fileUpload} = require("./fileUploadMiddleware");
 const {fileOperations} = require("./fileOperationsMiddleware");
 const {errorResponse} = require("./errorResponseMiddleware");
+const {photoLimit} = require("./photoLimitMiddleware");
 
 const app = express();
 
@@ -14,7 +15,8 @@ app.use(cors());
 app.use(authorization);
 
 // authorization bearer token => req.headers.authorization
-app.post("/photo", fileUpload, fileOperations, async (req, res, next) => {
+const photoMiddlewares = [photoLimit, fileUpload, fileOperations];
+app.post("/photo", photoMiddlewares, async (req, res, next) => {
   const uid = req.uid;
   const metadata = {
     metadata: {
