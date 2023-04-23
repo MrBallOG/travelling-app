@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/src/main_view/main_view.dart' show MainView;
 import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
+import 'package:mobile/src/widget/snackbars.dart';
 import 'package:provider/provider.dart';
 
 class SignInView extends StatefulWidget {
@@ -106,14 +107,12 @@ class _SignInViewState extends State<SignInView> {
                                 Provider.of<GoogleSingInController>(context,
                                     listen: false);
                             await singInController.signIn();
-                            await navigator.popAndPushNamed(MainView.routeName);
+                            navigator
+                                .restorablePopAndPushNamed(MainView.routeName);
                           } catch (_) {
                             unSetLoading();
-                            const snackBar = SnackBar(
-                              content: Text("Failed to sign in"),
-                              duration: Duration(seconds: 3),
-                            );
-                            messenger.showSnackBar(snackBar);
+                            messenger.showSnackBar(
+                                snackBarFailure("Failed to sign in"));
                           }
                         },
                       ),

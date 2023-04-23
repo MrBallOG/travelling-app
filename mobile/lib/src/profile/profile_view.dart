@@ -23,6 +23,7 @@ class ProfileView extends StatelessWidget {
           ),
         ],
       ),
+      restorationId: 'profile',
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -56,6 +56,7 @@ class _MainViewState extends State<MainView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView.builder(
+        restorationId: 'main',
         controller: pageController,
         onPageChanged: (index) => changeIndex(index),
         itemCount: views.length,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/src/sign_in/google_sign_in_controller.dart';
 import 'package:mobile/src/sign_in/sign_in_view.dart' show SignInView;
+import 'package:mobile/src/widget/snackbars.dart';
 import 'package:provider/provider.dart';
 
 import 'settings_controller.dart';
@@ -16,6 +17,7 @@ class SettingsView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
+      restorationId: 'settings',
       body: Column(
         children: [
           Padding(
@@ -74,19 +76,13 @@ class SettingsView extends StatelessWidget {
                           Provider.of<GoogleSingInController>(context,
                               listen: false);
                       await singInController.signOut();
-                      const snackBar = SnackBar(
-                        content: Text("You've been signed out"),
-                        duration: Duration(seconds: 3),
-                      );
-                      messenger.showSnackBar(snackBar);
-                      await navigator.pushNamedAndRemoveUntil(
+                      messenger.showSnackBar(
+                          snackBarSuccess("You've been signed out"));
+                      navigator.restorablePushNamedAndRemoveUntil(
                           SignInView.routeName, (r) => false);
                     } catch (_) {
-                      const snackBar = SnackBar(
-                        content: Text("Failed to sign out"),
-                        duration: Duration(seconds: 3),
-                      );
-                      messenger.showSnackBar(snackBar);
+                      messenger
+                          .showSnackBar(snackBarFailure("Failed to sign out"));
                     }
                   },
                   child: const Text("Sign out"),

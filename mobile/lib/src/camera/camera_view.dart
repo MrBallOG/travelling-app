@@ -8,6 +8,7 @@ import 'package:mobile/src/main_view/main_view.dart' show MainView;
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:mobile/src/widget/snackbars.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key});
@@ -54,7 +55,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     }
   }
 
-  Future<Position> determinePosition() async {
+  Future<void> checkLocationPermissions() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -80,9 +81,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     if (accuracy == LocationAccuracyStatus.reduced) {
       return Future.error('Turn on precise location');
     }
-
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best);
   }
 
   @override
@@ -91,6 +89,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       appBar: AppBar(
         title: const Text('Camera'),
       ),
+      restorationId: 'camera',
       body: FutureBuilder<XFile>(
         future: futurePhoto,
         builder: (context, snapshot) {
@@ -135,9 +134,25 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                             onPressed: () async {
                               final messenger = ScaffoldMessenger.of(context);
                               final navigator = Navigator.of(context);
-                              try {
-                                final position = await determinePosition();
 
+                              try {
+                                await checkLocationPermissions();
+                              } catch (e) {
+                                messenger.showSnackBar(
+                                    snackBarFailure(e.toString()));
+                                navigator.restorablePopAndPushNamed(
+                                    MainView.routeName);
+                                return;
+                              }
+
+                              try {
+                                messenger.showSnackBar(
+                                    snackBarProgress("Sending photo..."));
+                                navigator.restorablePopAndPushNamed(
+                                    MainView.routeName);
+                                final position =
+                                    await Geolocator.getCurrentPosition(
+                                        desiredAccuracy: LocationAccuracy.best);
                                 final token = await FirebaseAuth
                                     .instance.currentUser!
                                     .getIdToken();
@@ -151,28 +166,19 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                   ..files.add(await http.MultipartFile.fromPath(
                                       'photo', snapshot.data!.path,
                                       contentType: MediaType('image', 'jpeg')));
-                                var response = await request.send();
+
+                                var response = await request
+                                    .send()
+                                    .timeout(const Duration(minutes: 1));
                                 if (response.statusCode == 200) {
-                                  const snackBar = SnackBar(
-                                    content: Text("Photo sent"),
-                                    duration: Duration(seconds: 3),
-                                  );
-                                  messenger.showSnackBar(snackBar);
-                                  navigator.popAndPushNamed(MainView.routeName);
+                                  messenger.showSnackBar(
+                                      snackBarSuccess("Photo delivered"));
                                 } else {
-                                  const snackBar = SnackBar(
-                                    content: Text("Something went wrong"),
-                                    duration: Duration(seconds: 3),
-                                  );
-                                  messenger.showSnackBar(snackBar);
+                                  throw Error();
                                 }
-                              } catch (e) {
-                                final snackBar = SnackBar(
-                                  content: Text(e.toString()),
-                                  duration: const Duration(seconds: 3),
-                                );
-                                messenger.showSnackBar(snackBar);
-                                navigator.popAndPushNamed(MainView.routeName);
+                              } catch (_) {
+                                messenger.showSnackBar(snackBarFailure(
+                                    "Photo could not be delivered"));
                               }
                             },
                           ),
@@ -187,13 +193,11 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (snapshot.error is PlatformException) {
                 final messenger = ScaffoldMessenger.of(context);
-                const snackBar = SnackBar(
-                  content: Text("Camera is not available"),
-                  duration: Duration(seconds: 3),
-                );
-                messenger.showSnackBar(snackBar);
+                messenger
+                    .showSnackBar(snackBarFailure("Camera is not available"));
               }
-              Navigator.of(context).popAndPushNamed(MainView.routeName);
+              Navigator.of(context)
+                  .restorablePopAndPushNamed(MainView.routeName);
             });
           }
           return const Center(child: CircularProgressIndicator());
