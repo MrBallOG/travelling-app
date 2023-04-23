@@ -173,10 +173,9 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                 if (response.statusCode == 200) {
                                   messenger.showSnackBar(
                                       snackBarSuccess("Photo delivered"));
-                                  if (response.statusCode == 403) {
-                                    messenger.showSnackBar(snackBarFailure(
-                                        "Daily photo count limit reached"));
-                                  }
+                                } else if (response.statusCode == 403) {
+                                  messenger.showSnackBar(snackBarFailure(
+                                      "Daily photo count limit reached"));
                                 } else {
                                   throw Error();
                                 }
