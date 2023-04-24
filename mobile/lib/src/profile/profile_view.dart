@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/src/settings/settings_view.dart';
+import 'package:path/path.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -32,7 +34,7 @@ class ProfileView extends StatelessWidget {
             Center(
               child: CircleAvatar(
                 radius: 60,
-                backgroundImage: NetworkImage(user.photoURL!),
+                backgroundImage: CachedNetworkImageProvider(user.photoURL!),
               ),
             ),
             Padding(

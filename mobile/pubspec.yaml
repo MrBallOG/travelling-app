@@ -10,6 +10,7 @@ environment:
   sdk: ">=2.18.2 <3.0.0"
 
 dependencies:
+  cached_network_image: ^3.2.3
   firebase_auth: ^4.2.4
   firebase_core: ^2.9.0
   flutter:
