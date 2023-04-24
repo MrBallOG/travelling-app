@@ -35,7 +35,7 @@ app.post("/photo", photoMiddlewares, async (req, res, next) => {
     latitude: req.body.latitude,
   };
   await db.collection("tempPhotos").add(tempPhoto);
-  functions.logger.info("FIRESTORE: TempPhoto created", req.file.filename);
+  functions.logger.info("FIRESTORE: TempPhoto created", tempPhoto);
 
   res.sendStatus(200);
 });
