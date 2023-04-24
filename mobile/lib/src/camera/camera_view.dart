@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mobile/src/env_variables/env_variables.dart';
+import 'package:mobile/src/http_client/http_client.dart';
 import 'package:mobile/src/main_view/main_view.dart' show MainView;
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -156,7 +156,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                 final token = await FirebaseAuth
                                     .instance.currentUser!
                                     .getIdToken();
-                                var uri = Uri.parse("${API_URL}photo");
+                                var uri = HttpClient.photoUri;
                                 var request = http.MultipartRequest('POST', uri)
                                   ..headers['Authorization'] = 'Bearer $token'
                                   ..fields['latitude'] =
@@ -166,9 +166,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                                   ..files.add(await http.MultipartFile.fromPath(
                                       'photo', snapshot.data!.path,
                                       contentType: MediaType('image', 'jpeg')));
-
-                                var response = await request
-                                    .send()
+                                var response = await HttpClient.client
+                                    .send(request)
                                     .timeout(const Duration(minutes: 1));
                                 if (response.statusCode == 200) {
                                   messenger.showSnackBar(
