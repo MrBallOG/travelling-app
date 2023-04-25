@@ -74,14 +74,27 @@ exports.fileUpload = function(req, res, next) {
         fields, "latitude",
     );
 
-    if (!hasLatitude || !hasLongitude) {
+    if (!hasLongitude || !hasLatitude) {
       const err = new Error("Missing fields");
       err.statusCode = 400;
       return next(err);
     }
 
-    if (isNaN(fields.longitude) || isNaN(fields.latitude)) {
+    const longitude = fields.longitude;
+    const latitude = fields.latitude;
+
+    if (isNaN(longitude) || isNaN(latitude)) {
       const err = new Error("Longitude and latitude must be floats");
+      err.statusCode = 400;
+      return next(err);
+    }
+
+    const longitudeInBounds = longitude <= 180 && longitude >= -180;
+    const latitudeInBounds = latitude <= 90 && latitude >= -90;
+
+    if (!longitudeInBounds || !latitudeInBounds) {
+      const err = new Error(
+          "Longitude and latitude must be in bounds ([-180, 180], [-90, 90])");
       err.statusCode = 400;
       return next(err);
     }
